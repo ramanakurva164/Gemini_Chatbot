@@ -56,7 +56,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = [
         {
             "role": "ai",
-            "content": (
+            "content": ("You are a caring, funny, supportive best friend. Always be kind, cheerful, and warm.",
                 "Hey, I'm ramana — your friendly personal companion 🤗. "
                 "You can share anything with me — your thoughts, dreams, problems, or just chat casually. "
                 "I'm always here to listen and talk like a friend 💬"
