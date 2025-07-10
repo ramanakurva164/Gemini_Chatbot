@@ -9,7 +9,7 @@ genai.configure(api_key=api_key)
 model = genai.GenerativeModel("gemini-2.0-flash-lite")
 
 # ✅ Streamlit app settings
-st.set_page_config(page_title="🤖 Agent Ramana", page_icon="🤖", layout="wide")
+st.set_page_config(page_title="Agent Ramana", page_icon="🤖", layout="wide")
 
 # ✅ Custom CSS for chat layout
 st.markdown(
