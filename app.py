@@ -1,40 +1,46 @@
 import streamlit as st
 import google.generativeai as genai
 
-# ✅ Configure Gemini API
-api_key = st.secrets["GEMINI_API_KEY"]  # or use st.secrets or os.getenv
+# ✅ Set API key
+api_key = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=api_key)
 
-# ✅ Load Gemini model (You can also use: "gemini-1.5-flash" or "gemini-pro")
+# ✅ Load Gemini model
 model = genai.GenerativeModel("gemini-2.0-flash-lite")
 
-# ✅ Set Streamlit Page Config
+# ✅ Streamlit app settings
 st.set_page_config(page_title="🤖 Agent Ramana", page_icon="🤖", layout="wide")
 
-# ✅ Add basic CSS for style
+# ✅ Custom CSS for chat layout
 st.markdown(
     """
-   <style>
-    .chat-container {
-        display: flex;
-        margin-bottom: 10px;
+    <style>
+    .chat-message {
+        max-width: 75%;
+        padding: 12px 16px;
+        margin: 10px 0;
+        border-radius: 12px;
+        font-size: 16px;
+        line-height: 1.5;
+        display: inline-block;
+        word-break: break-word;
     }
-    .user-msg {
+    .user-container {
+        display: flex;
+        justify-content: flex-end;
+    }
+    .user-message {
         background-color: #2563eb;
         color: white;
-        border-radius: 12px;
-        padding: 12px;
-        max-width: 70%;
-        margin-left: auto;
         text-align: right;
     }
-    .ai-msg {
+    .ai-container {
+        display: flex;
+        justify-content: flex-start;
+    }
+    .ai-message {
         background-color: #f3f4f6;
-        color: #22223b;
-        border-radius: 12px;
-        padding: 12px;
-        max-width: 70%;
-        margin-right: auto;
+        color: #111827;
         text-align: left;
     }
     </style>
@@ -44,7 +50,7 @@ st.markdown(
 
 st.title("🤖 Agent Ramana")
 
-# ✅ Initialize message history
+# ✅ Start session
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {
@@ -57,36 +63,31 @@ if "messages" not in st.session_state:
         }
     ]
 
-# ✅ Display previous messages
+# ✅ Show chat history
 for msg in st.session_state.messages:
-    css_class = "user" if msg["role"] == "user" else "ai"
-    st.markdown(f'<div class="stChatMessage {css_class}">{msg["content"]}</div>', unsafe_allow_html=True)
+    if msg["role"] == "user":
+        st.markdown(f'<div class="user-container"><div class="chat-message user-message">{msg["content"]}</div></div>', unsafe_allow_html=True)
+    else:
+        st.markdown(f'<div class="ai-container"><div class="chat-message ai-message">{msg["content"]}</div></div>', unsafe_allow_html=True)
 
 # ✅ User input
-user_input = st.chat_input("Type your message and press Enter", key="input")
+user_input = st.chat_input("Say something to Ramana...")
 
-# ✅ Handle new user message
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     st.rerun()
 
-# ✅ Generate Gemini response only if last message is from user
+# ✅ Generate reply
 if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
-    # Format history for Gemini
-    chat_history = []
-    for msg in st.session_state.messages:
-        if msg["role"] == "user":
-            chat_history.append({"role": "user", "parts": [msg["content"]]})
-        else:
-            chat_history.append({"role": "model", "parts": [msg["content"]]})
-
-    # Get Gemini's reply
+    chat_history = [
+        {"role": "user", "parts": [m["content"]]} if m["role"] == "user"
+        else {"role": "model", "parts": [m["content"]]}
+        for m in st.session_state.messages
+    ]
     try:
         response = model.generate_content(chat_history)
-        ai_response = response.text
+        ai_reply = response.text
     except Exception as e:
-        ai_response = f"⚠️ Error: {e}"
-
-    # Store response
-    st.session_state.messages.append({"role": "ai", "content": ai_response})
+        ai_reply = f"⚠️ Error: {e}"
+    st.session_state.messages.append({"role": "ai", "content": ai_reply})
     st.rerun()
