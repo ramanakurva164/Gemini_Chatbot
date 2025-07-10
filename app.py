@@ -34,10 +34,12 @@ st.markdown(
         text-align: right;
         margin-left: auto;
         float: right;
+        padding:auto;
     }
     .ai {
         background-color: #f3f4f6;
         color: #22223b;
+        padding:auto;
         margin-right: auto;
         float: left;
     }
