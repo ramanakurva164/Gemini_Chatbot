@@ -1,21 +1,17 @@
 import streamlit as st
-
 import google.generativeai as genai
 
-# Load environment variables
-
-# Optional: Use os.getenv or hardcoded key
- 
-api_key = st.secrets["GEMINI_API_KEY"]
+# ✅ Configure Gemini API
+api_key = st.secrets["GEMINI_API_KEY"]  # or use st.secrets or os.getenv
 genai.configure(api_key=api_key)
 
-# Initialize Gemini model
-# model = genai.GenerativeModel("gemini-1.5-flash")
+# ✅ Load Gemini model (You can also use: "gemini-1.5-flash" or "gemini-pro")
 model = genai.GenerativeModel("gemini-2.0-flash-lite")
 
-# Streamlit page config
-st.set_page_config(page_title="YOURS RAMANA", page_icon="🤖", layout="wide")
+# ✅ Set Streamlit Page Config
+st.set_page_config(page_title="🤖 Agent Ramana", page_icon="🤖", layout="wide")
 
+# ✅ Add basic CSS for style
 st.markdown(
     """
     <style>
@@ -33,15 +29,12 @@ st.markdown(
         color: #fff;
         text-align: right;
         margin-left: auto;
-        float: right;
-        padding:auto;
     }
     .ai {
         background-color: #f3f4f6;
         color: #22223b;
-        padding:auto;
+        text-align: left;
         margin-right: auto;
-        float: left;
     }
     </style>
     """,
@@ -50,54 +43,49 @@ st.markdown(
 
 st.title("🤖 Agent Ramana")
 
-# Initialize session state
-# Add friendly system prompt if starting fresh
+# ✅ Initialize message history
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {
             "role": "ai",
-            "content": ("You are a caring, funny, supportive best friend. Always be kind, cheerful, and warm.",
-                "Hey, I'm ramana — your friendly personal companion 🤗. "
+            "content": (
+                "Hey, I'm Ramana — your friendly personal companion 🤗. "
                 "You can share anything with me — your thoughts, dreams, problems, or just chat casually. "
                 "I'm always here to listen and talk like a friend 💬"
             )
         }
     ]
 
-
-# Display previous messages
+# ✅ Display previous messages
 for msg in st.session_state.messages:
     css_class = "user" if msg["role"] == "user" else "ai"
     st.markdown(f'<div class="stChatMessage {css_class}">{msg["content"]}</div>', unsafe_allow_html=True)
 
-# User input
+# ✅ User input
 user_input = st.chat_input("Type your message and press Enter", key="input")
 
+# ✅ Handle new user message
 if user_input:
-    # Add user message to history and rerun immediately
     st.session_state.messages.append({"role": "user", "content": user_input})
     st.rerun()
 
-# If the last message is from the user, generate bot reply
+# ✅ Generate Gemini response only if last message is from user
 if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
-    chat_history = [
-        {"role": "user", "parts": [msg["content"]]} if msg["role"] == "user"
-        else {"role": "model", "parts": [msg["content"]]}
-        for msg in st.session_state.messages
-    ]
+    # Format history for Gemini
+    chat_history = []
+    for msg in st.session_state.messages:
+        if msg["role"] == "user":
+            chat_history.append({"role": "user", "parts": [msg["content"]]})
+        else:
+            chat_history.append({"role": "model", "parts": [msg["content"]]})
+
+    # Get Gemini's reply
     try:
         response = model.generate_content(chat_history)
         ai_response = response.text
     except Exception as e:
         ai_response = f"⚠️ Error: {e}"
+
+    # Store response
     st.session_state.messages.append({"role": "ai", "content": ai_response})
     st.rerun()
-
-# List available models for debugging
-try:
-    models = genai.list_models()
-    for m in models:
-        print(m)
-except Exception as e:
-    print(f"Error listing models: {e}")
-
