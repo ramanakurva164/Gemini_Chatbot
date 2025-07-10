@@ -14,7 +14,7 @@ genai.configure(api_key=api_key)
 model = genai.GenerativeModel("gemini-2.0-flash-lite")
 
 # Streamlit page config
-st.set_page_config(page_title="Gemini Chatbot", page_icon="🤖", layout="wide")
+st.set_page_config(page_title="Agent Ram", page_icon="🤖", layout="wide")
 
 st.markdown(
     """
@@ -46,7 +46,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.title("🤖 Gemini Chatbot")
+st.title("🤖 Agent Ram")
 
 # Initialize session state
 if "messages" not in st.session_state:
