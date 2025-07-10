@@ -49,8 +49,19 @@ st.markdown(
 st.title("🤖 Agent Ram")
 
 # Initialize session state
+# Add friendly system prompt if starting fresh
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state.messages = [
+        {
+            "role": "ai",
+            "content": (
+                "Hey, I'm Ram — your friendly personal companion 🤗. "
+                "You can share anything with me — your thoughts, dreams, problems, or just chat casually. "
+                "I'm always here to listen and talk like a friend 💬"
+            )
+        }
+    ]
+
 
 # Display previous messages
 for msg in st.session_state.messages:
