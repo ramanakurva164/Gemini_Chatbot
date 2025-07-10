@@ -14,27 +14,28 @@ st.set_page_config(page_title="🤖 Agent Ramana", page_icon="🤖", layout="wid
 # ✅ Add basic CSS for style
 st.markdown(
     """
-    <style>
-    .stChatMessage {
-        display: inline-block;
-        padding: 12px;
-        border-radius: 12px;
-        margin-bottom: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-        max-width: 70%;
-        word-break: break-word;
+   <style>
+    .chat-container {
+        display: flex;
+        margin-bottom: 10px;
     }
-    .user {
+    .user-msg {
         background-color: #2563eb;
-        color: #fff;
-        text-align: right;
+        color: white;
+        border-radius: 12px;
+        padding: 12px;
+        max-width: 70%;
         margin-left: auto;
+        text-align: right;
     }
-    .ai {
+    .ai-msg {
         background-color: #f3f4f6;
         color: #22223b;
-        text-align: left;
+        border-radius: 12px;
+        padding: 12px;
+        max-width: 70%;
         margin-right: auto;
+        text-align: left;
     }
     </style>
     """,
