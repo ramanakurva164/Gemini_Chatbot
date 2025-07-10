@@ -14,7 +14,7 @@ genai.configure(api_key=api_key)
 model = genai.GenerativeModel("gemini-2.0-flash-lite")
 
 # Streamlit page config
-st.set_page_config(page_title="Agent Ram", page_icon="🤖", layout="wide")
+st.set_page_config(page_title="YOURS RAMANA", page_icon="🤖", layout="wide")
 
 st.markdown(
     """
@@ -48,7 +48,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.title("🤖 Agent Ram")
+st.title("🤖 Agent Ramana")
 
 # Initialize session state
 # Add friendly system prompt if starting fresh
@@ -57,7 +57,7 @@ if "messages" not in st.session_state:
         {
             "role": "ai",
             "content": (
-                "Hey, I'm Ram — your friendly personal companion 🤗. "
+                "Hey, I'm ramana — your friendly personal companion 🤗. "
                 "You can share anything with me — your thoughts, dreams, problems, or just chat casually. "
                 "I'm always here to listen and talk like a friend 💬"
             )
