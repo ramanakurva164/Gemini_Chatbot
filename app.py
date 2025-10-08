@@ -38,6 +38,9 @@ if "messages" not in st.session_state:
         {"role": "ai", "content": "👋 Hi! I'm your FlavorFussion Assistant. I can help you explore cuisines and dishes. Try asking: 'Show me Indian dishes', or 'What cuisines do you have?' "}
     ]
 
+if "last_cuisine" not in st.session_state:
+    st.session_state.last_cuisine = None
+
 # --------------------------
 # Function: fetch dishes from Spoonacular
 # --------------------------
@@ -74,50 +77,62 @@ if user_input:
 # Generate reply
 # --------------------------
 if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
-    last_msg = st.session_state.messages[-1]["content"]
+    last_msg = st.session_state.messages[-1]["content"].lower()
 
-    # --- Simple keyword detection for cuisines ---
-    cuisines = ["indian", "italian", "mexican", "chinese", "japanese", "french"]
-    found_cuisine = None
-    for cuisine in cuisines:
-        if cuisine.lower() in last_msg.lower():
-            found_cuisine = cuisine
-            break
-
-    if found_cuisine:
-        # Fetch dishes from Spoonacular
-        dishes = fetch_dishes(found_cuisine)
-        if dishes:
-            content = f"Here are some **{found_cuisine.title()} dishes**:\n"
-            for d in dishes:
-                content += f"- {d['name']}\n"
-            st.session_state.messages.append({"role": "ai", "content": content})
-            
-            # Show images inline
-            for d in dishes:
-                st.image(d["image"], caption=d["name"], width=200)
+    # --- Check if user asks for images ---
+    if any(word in last_msg for word in ["image", "show pictures", "show me images"]):
+        if st.session_state.last_cuisine:
+            dishes = fetch_dishes(st.session_state.last_cuisine)
+            if dishes:
+                content = f"Here are some **{st.session_state.last_cuisine.title()} dishes with images**:\n"
+                st.session_state.messages.append({"role": "ai", "content": content})
+                for d in dishes:
+                    st.image(d["image"], caption=d["name"], width=200)
+            else:
+                st.session_state.messages.append({"role": "ai", "content": "Sorry, I couldn't fetch images right now."})
         else:
-            st.session_state.messages.append({"role": "ai", "content": f"Sorry, I couldn't fetch {found_cuisine.title()} dishes right now."})
+            st.session_state.messages.append({"role": "ai", "content": "Please ask for a cuisine first, then I can show images."})
         st.rerun()
 
     else:
-        # --- Fallback: Gemini for general site-related questions ---
-        system_prompt = (
-            "You are FlavorFussion Assistant. "
-            "Help users explore the website. "
-            "Talk about cuisines, dishes, and site features. "
-            "Do not answer unrelated questions."
-        )
-        chat_history = [
-            {"role": "user", "parts": [m["content"]]} if m["role"] == "user"
-            else {"role": "model", "parts": [m["content"]]}
-            for m in st.session_state.messages
-        ]
-        try:
-            response = model.generate_content(chat_history)
-            ai_reply = response.text
-        except Exception as e:
-            ai_reply = f"⚠️ Error: {e}"
+        # --- Detect cuisine keywords ---
+        cuisines = ["indian", "italian", "mexican", "chinese", "japanese", "french"]
+        found_cuisine = None
+        for cuisine in cuisines:
+            if cuisine in last_msg:
+                found_cuisine = cuisine
+                break
 
-        st.session_state.messages.append({"role": "ai", "content": ai_reply})
-        st.rerun()
+        if found_cuisine:
+            st.session_state.last_cuisine = found_cuisine  # save for follow-up requests
+            dishes = fetch_dishes(found_cuisine)
+            if dishes:
+                content = f"Here are some **{found_cuisine.title()} dishes**:\n"
+                for d in dishes:
+                    content += f"- {d['name']}\n"
+                st.session_state.messages.append({"role": "ai", "content": content})
+            else:
+                st.session_state.messages.append({"role": "ai", "content": f"Sorry, I couldn't fetch {found_cuisine.title()} dishes right now."})
+            st.rerun()
+
+        else:
+            # --- Fallback: Gemini for general site-related questions ---
+            system_prompt = (
+                "You are FlavorFussion Assistant. "
+                "Help users explore the website. "
+                "Talk about cuisines, dishes, and site features. "
+                "Do not answer unrelated questions."
+            )
+            chat_history = [
+                {"role": "user", "parts": [m["content"]]} if m["role"] == "user"
+                else {"role": "model", "parts": [m["content"]]}
+                for m in st.session_state.messages
+            ]
+            try:
+                response = model.generate_content(chat_history)
+                ai_reply = response.text
+            except Exception as e:
+                ai_reply = f"⚠️ Error: {e}"
+
+            st.session_state.messages.append({"role": "ai", "content": ai_reply})
+            st.rerun()
