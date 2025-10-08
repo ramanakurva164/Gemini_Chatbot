@@ -41,6 +41,9 @@ if "messages" not in st.session_state:
 if "last_cuisine" not in st.session_state:
     st.session_state.last_cuisine = None
 
+if "images" not in st.session_state:
+    st.session_state.images = []  # store dish images persistently
+
 # --------------------------
 # Function: fetch dishes from Spoonacular
 # --------------------------
@@ -56,13 +59,17 @@ def fetch_dishes(cuisine, number=5):
         return []
 
 # --------------------------
-# Show chat history
+# Show chat history + images
 # --------------------------
 for msg in st.session_state.messages:
     if msg["role"] == "user":
         st.markdown(f'<div class="user-container"><div class="chat-message user-message">{msg["content"]}</div></div>', unsafe_allow_html=True)
     else:
         st.markdown(f'<div class="ai-container"><div class="chat-message ai-message">{msg["content"]}</div></div>', unsafe_allow_html=True)
+        # Display images associated with this message
+        if st.session_state.images:
+            for d in st.session_state.images:
+                st.image(d["image"], caption=d["name"], width=200)
 
 # --------------------------
 # User input
@@ -86,8 +93,7 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
             if dishes:
                 content = f"Here are some **{st.session_state.last_cuisine.title()} dishes with images**:\n"
                 st.session_state.messages.append({"role": "ai", "content": content})
-                for d in dishes:
-                    st.image(d["image"], caption=d["name"], width=200)
+                st.session_state.images = dishes  # save images persistently
             else:
                 st.session_state.messages.append({"role": "ai", "content": "Sorry, I couldn't fetch images right now."})
         else:
@@ -111,6 +117,7 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
                 for d in dishes:
                     content += f"- {d['name']}\n"
                 st.session_state.messages.append({"role": "ai", "content": content})
+                st.session_state.images = dishes  # save images persistently
             else:
                 st.session_state.messages.append({"role": "ai", "content": f"Sorry, I couldn't fetch {found_cuisine.title()} dishes right now."})
             st.rerun()
