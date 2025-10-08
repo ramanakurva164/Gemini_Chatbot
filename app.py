@@ -18,18 +18,15 @@ model = genai.GenerativeModel("gemini-2.0-flash-lite")
 # --------------------------
 st.set_page_config(page_title="FlavorFussion Assistant", page_icon="🤖", layout="wide")
 
-st.markdown(
-    """
-    <style>
-    .chat-message { max-width: 75%; padding: 12px 16px; margin: 10px 0; border-radius: 12px; font-size: 16px; line-height: 1.5; display: inline-block; word-break: break-word; }
-    .user-container { display: flex; justify-content: flex-end; }
-    .user-message { background-color: #2563eb; color: white; text-align: right; }
-    .ai-container { display: flex; justify-content: flex-start; }
-    .ai-message { background-color: #f3f4f6; color: #111827; text-align: left; }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+st.markdown("""
+<style>
+.chat-message { max-width: 75%; padding: 12px 16px; margin: 10px 0; border-radius: 12px; font-size: 16px; line-height: 1.5; display: inline-block; word-break: break-word; }
+.user-container { display: flex; justify-content: flex-end; }
+.user-message { background-color: #2563eb; color: white; text-align: right; }
+.ai-container { display: flex; justify-content: flex-start; }
+.ai-message { background-color: #f3f4f6; color: #111827; text-align: left; }
+</style>
+""", unsafe_allow_html=True)
 
 st.title("🤖 FlavorFussion Assistant")
 
