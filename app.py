@@ -35,14 +35,11 @@ st.title("🤖 FlavorFussion Assistant")
 # --------------------------
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "ai", "content": "👋 Hi! I'm your FlavorFussion Assistant. I can help you explore cuisines and dishes. Try asking: 'Show me Indian dishes', or 'What cuisines do you have?' "}
+        {"role": "ai", "content": "👋 Hi! I'm your FlavorFussion Assistant. I can help you explore cuisines and dishes. Try asking: 'Show me Indian dishes', or 'What cuisines do you have?'", "images": []}
     ]
 
 if "last_cuisine" not in st.session_state:
     st.session_state.last_cuisine = None
-
-if "images" not in st.session_state:
-    st.session_state.images = []  # store dish images persistently
 
 # --------------------------
 # Function: fetch dishes from Spoonacular
@@ -59,16 +56,16 @@ def fetch_dishes(cuisine, number=5):
         return []
 
 # --------------------------
-# Show chat history + images
+# Show chat history
 # --------------------------
 for msg in st.session_state.messages:
     if msg["role"] == "user":
         st.markdown(f'<div class="user-container"><div class="chat-message user-message">{msg["content"]}</div></div>', unsafe_allow_html=True)
     else:
         st.markdown(f'<div class="ai-container"><div class="chat-message ai-message">{msg["content"]}</div></div>', unsafe_allow_html=True)
-        # Display images associated with this message
-        if st.session_state.images:
-            for d in st.session_state.images:
+        # Display images for this AI message only
+        if "images" in msg and msg["images"]:
+            for d in msg["images"]:
                 st.image(d["image"], caption=d["name"], width=200)
 
 # --------------------------
@@ -92,12 +89,11 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
             dishes = fetch_dishes(st.session_state.last_cuisine)
             if dishes:
                 content = f"Here are some **{st.session_state.last_cuisine.title()} dishes with images**:\n"
-                st.session_state.messages.append({"role": "ai", "content": content})
-                st.session_state.images = dishes  # save images persistently
+                st.session_state.messages.append({"role": "ai", "content": content, "images": dishes})
             else:
-                st.session_state.messages.append({"role": "ai", "content": "Sorry, I couldn't fetch images right now."})
+                st.session_state.messages.append({"role": "ai", "content": "Sorry, I couldn't fetch images right now.", "images": []})
         else:
-            st.session_state.messages.append({"role": "ai", "content": "Please ask for a cuisine first, then I can show images."})
+            st.session_state.messages.append({"role": "ai", "content": "Please ask for a cuisine first, then I can show images.", "images": []})
         st.rerun()
 
     else:
@@ -110,20 +106,19 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
                 break
 
         if found_cuisine:
-            st.session_state.last_cuisine = found_cuisine  # save for follow-up requests
+            st.session_state.last_cuisine = found_cuisine
             dishes = fetch_dishes(found_cuisine)
             if dishes:
                 content = f"Here are some **{found_cuisine.title()} dishes**:\n"
                 for d in dishes:
                     content += f"- {d['name']}\n"
-                st.session_state.messages.append({"role": "ai", "content": content})
-                st.session_state.images = dishes  # save images persistently
+                st.session_state.messages.append({"role": "ai", "content": content, "images": dishes})
             else:
-                st.session_state.messages.append({"role": "ai", "content": f"Sorry, I couldn't fetch {found_cuisine.title()} dishes right now."})
+                st.session_state.messages.append({"role": "ai", "content": f"Sorry, I couldn't fetch {found_cuisine.title()} dishes right now.", "images": []})
             st.rerun()
 
         else:
-            # --- Fallback: Gemini for general site-related questions ---
+            # --- Fallback: Gemini for general site questions ---
             system_prompt = (
                 "You are FlavorFussion Assistant. "
                 "Help users explore the website. "
@@ -141,5 +136,5 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
             except Exception as e:
                 ai_reply = f"⚠️ Error: {e}"
 
-            st.session_state.messages.append({"role": "ai", "content": ai_reply})
+            st.session_state.messages.append({"role": "ai", "content": ai_reply, "images": []})
             st.rerun()
